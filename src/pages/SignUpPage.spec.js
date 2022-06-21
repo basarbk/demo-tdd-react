@@ -1,7 +1,8 @@
 import SignUpPage from './SignUpPage';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import axios from 'axios';
+// import axios from 'axios';
+import 'whatwg-fetch';
 
 describe('Sign Up Page', () => {
   describe('Layout', () => {
@@ -74,12 +75,14 @@ describe('Sign Up Page', () => {
       const button = screen.queryByRole('button', { name: 'Sign Up' });
 
       const mockFn = jest.fn();
-      axios.post = mockFn;
+      // axios.post = mockFn;
+      window.fetch = mockFn;
 
       userEvent.click(button);
 
       const firstCallOfMockFunction = mockFn.mock.calls[0];
-      const body = firstCallOfMockFunction[1];
+      // const body = firstCallOfMockFunction[1];
+      const body = JSON.parse(firstCallOfMockFunction[1].body);
       expect(body).toEqual({
         username: 'user1',
         email: 'user1@mail.com',
