@@ -121,14 +121,6 @@ describe("Sign Up Page", () => {
         "Please check your e-mail to activate your account"
       );
     });
-    it("displays account activation notification after successful sign up request", async () => {
-      setup();
-      const message = "Please check your e-mail to activate your account";
-      expect(screen.queryByText(message)).not.toBeInTheDocument();
-      userEvent.click(button);
-      const text = await screen.findByText(message);
-      expect(text).toBeInTheDocument();
-    });
     it("hides sign up form after successful sign up request", async () => {
       setup();
       const form = screen.getByTestId("form-sign-up");
@@ -154,6 +146,14 @@ describe("Sign Up Page", () => {
         'Username cannot be null'
       );
       expect(validationError).toBeInTheDocument();
+    });
+    it("displays account activation notification after successful sign up request", async () => {
+      setup();
+      const message = "Please check your e-mail to activate your account";
+      expect(screen.queryByText(message)).not.toBeInTheDocument();
+      userEvent.click(button);
+      const text = await screen.findByText(message);
+      expect(text).toBeInTheDocument();
     });
   });
 });
