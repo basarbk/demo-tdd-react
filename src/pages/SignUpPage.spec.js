@@ -137,5 +137,23 @@ describe("Sign Up Page", () => {
         expect(form).not.toBeInTheDocument();
       });
     });
+    it('displays validation message for username', async () => {
+      server.use(
+        rest.post('/users', (req, res, ctx) => {
+          return res(
+            ctx.status(400),
+            ctx.json({
+              username: 'Username cannot be null'
+            })
+          );
+        })
+      );
+      setup();
+      userEvent.click(button);
+      const validationError = await screen.findByText(
+        'Username cannot be null'
+      );
+      expect(validationError).toBeInTheDocument();
+    });
   });
 });
