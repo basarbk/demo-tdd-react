@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import Input from '../components/Input';
 import axios from 'axios';
 
 class SignUpPage extends Component {
@@ -53,17 +54,12 @@ class SignUpPage extends Component {
               <h1 className="text-center">Sign Up</h1>
             </div>
             <div className="card-body">
-              <div className="mb-3">
-                <label htmlFor="username" className="form-label">
-                  Username
-                </label>
-                <input
-                  id="username"
-                  className="form-control"
-                  onChange={this.onChange}
-                />
-                <span>{errors.username}</span>
-              </div>
+              <Input
+                id="username"
+                label="Username"
+                onChange={this.onChange}
+                help={errors.username}
+              />
               <div className="mb-3">
                 <label className="form-label" htmlFor="email">
                   E-mail
