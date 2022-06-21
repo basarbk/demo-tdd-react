@@ -1,81 +1,81 @@
-import SignUpPage from './SignUpPage';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { setupServer } from 'msw/node';
-import { rest } from 'msw';
+import SignUpPage from "./SignUpPage";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { setupServer } from "msw/node";
+import { rest } from "msw";
 
-describe('Sign Up Page', () => {
-  describe('Layout', () => {
-    it('has header', () => {
+describe("Sign Up Page", () => {
+  describe("Layout", () => {
+    it("has header", () => {
       render(<SignUpPage />);
-      const header = screen.queryByRole('heading', { name: 'Sign Up' });
+      const header = screen.queryByRole("heading", { name: "Sign Up" });
       expect(header).toBeInTheDocument();
     });
-    it('has username input', () => {
+    it("has username input", () => {
       render(<SignUpPage />);
-      const input = screen.getByLabelText('Username');
+      const input = screen.getByLabelText("Username");
       expect(input).toBeInTheDocument();
     });
-    it('has email input', () => {
+    it("has email input", () => {
       render(<SignUpPage />);
-      const input = screen.getByLabelText('E-mail');
+      const input = screen.getByLabelText("E-mail");
       expect(input).toBeInTheDocument();
     });
-    it('has password input', () => {
+    it("has password input", () => {
       render(<SignUpPage />);
-      const input = screen.getByLabelText('Password');
+      const input = screen.getByLabelText("Password");
       expect(input).toBeInTheDocument();
     });
-    it('has password type for password input', () => {
+    it("has password type for password input", () => {
       render(<SignUpPage />);
-      const input = screen.getByLabelText('Password');
-      expect(input.type).toBe('password');
+      const input = screen.getByLabelText("Password");
+      expect(input.type).toBe("password");
     });
-    it('has password repeat input', () => {
+    it("has password repeat input", () => {
       render(<SignUpPage />);
-      const input = screen.getByLabelText('Password Repeat');
+      const input = screen.getByLabelText("Password Repeat");
       expect(input).toBeInTheDocument();
     });
-    it('has password type for password repeat input', () => {
+    it("has password type for password repeat input", () => {
       render(<SignUpPage />);
-      const input = screen.getByLabelText('Password Repeat');
-      expect(input.type).toBe('password');
+      const input = screen.getByLabelText("Password Repeat");
+      expect(input.type).toBe("password");
     });
-    it('has Sign Up button', () => {
+    it("has Sign Up button", () => {
       render(<SignUpPage />);
-      const button = screen.queryByRole('button', { name: 'Sign Up' });
+      const button = screen.queryByRole("button", { name: "Sign Up" });
       expect(button).toBeInTheDocument();
     });
-    it('disables the button initially', () => {
+    it("disables the button initially", () => {
       render(<SignUpPage />);
-      const button = screen.queryByRole('button', { name: 'Sign Up' });
+      const button = screen.queryByRole("button", { name: "Sign Up" });
       expect(button).toBeDisabled();
     });
   });
-  describe('Interactions', () => {
+  describe("Interactions", () => {
     let button;
 
     const setup = () => {
       render(<SignUpPage />);
-      const usernameInput = screen.getByLabelText('Username');
-      const emailInput = screen.getByLabelText('E-mail');
-      const passwordInput = screen.getByLabelText('Password');
-      const passwordRepeatInput = screen.getByLabelText('Password Repeat');
-      userEvent.type(usernameInput, 'user1');
-      userEvent.type(emailInput, 'user1@mail.com');
-      userEvent.type(passwordInput, 'P4ssword');
-      userEvent.type(passwordRepeatInput, 'P4ssword');
-      button = screen.queryByRole('button', { name: 'Sign Up' });
+      const usernameInput = screen.getByLabelText("Username");
+      const emailInput = screen.getByLabelText("E-mail");
+      const passwordInput = screen.getByLabelText("Password");
+      const passwordRepeatInput = screen.getByLabelText("Password Repeat");
+      userEvent.type(usernameInput, "user1");
+      userEvent.type(emailInput, "user1@mail.com");
+      userEvent.type(passwordInput, "P4ssword");
+      userEvent.type(passwordRepeatInput, "P4ssword");
+      button = screen.queryByRole("button", { name: "Sign Up" });
     };
 
-    it('enables the button when password and password repeat fields have same value', () => {
+    it("enables the button when password and password repeat fields have same value", () => {
       setup();
       expect(button).toBeEnabled();
     });
-    it('sends username, email and password to backend after clicking the button', async () => {
+    it("sends username, email and password to backend after clicking the button", async () => {
       let requestBody;
       const server = setupServer(
-        rest.post('/users', (req, res, ctx) => {
+        rest.post("/users", (req, res, ctx) => {
           requestBody = req.body;
           return res(ctx.status(200));
         })
@@ -92,10 +92,10 @@ describe('Sign Up Page', () => {
         });
       })
     });
-    it('disables button when there is an ongoing api call', async () => {
+    it("disables button when there is an ongoing api call", async () => {
       let counter = 0;
       const server = setupServer(
-        rest.post('/users', (req, res, ctx) => {
+        rest.post("/users", (req, res, ctx) => {
           counter += 1;
           return res(ctx.status(200));
         })
@@ -109,18 +109,49 @@ describe('Sign Up Page', () => {
         expect(counter).toBe(1);
       })
     });
-    it('displays spinner after clicking the submit', async () => {
+    it("displays spinner after clicking the submit", async () => {
       const server = setupServer(
-        rest.post('/users', (req, res, ctx) => {
+        rest.post("/users", (req, res, ctx) => {
           return res(ctx.status(200));
         })
       );
       server.listen();
       setup();
-      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
       userEvent.click(button);
-      const spinner = screen.getByRole('status');
+      const spinner = screen.getByRole("status");
       expect(spinner).toBeInTheDocument();
+      await screen.findByText(
+        "Please check your e-mail to activate your account"
+      );
+    });
+    it("displays account activation notification after successful sign up request", async () => {
+      const server = setupServer(
+        rest.post("/users", (req, res, ctx) => {
+          return res(ctx.status(200));
+        })
+      );
+      server.listen();
+      setup();
+      const message = "Please check your e-mail to activate your account";
+      expect(screen.queryByText(message)).not.toBeInTheDocument();
+      userEvent.click(button);
+      const text = await screen.findByText(message);
+      expect(text).toBeInTheDocument();
+    });
+    it("hides sign up form after successful sign up request", async () => {
+      const server = setupServer(
+        rest.post("/users", (req, res, ctx) => {
+          return res(ctx.status(200));
+        })
+      );
+      server.listen();
+      setup();
+      const form = screen.getByTestId("form-sign-up");
+      userEvent.click(button);
+      await waitFor(() => {
+        expect(form).not.toBeInTheDocument();
+      });
     });
   });
 });
