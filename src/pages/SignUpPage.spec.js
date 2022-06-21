@@ -1,7 +1,8 @@
 import SignUpPage from './SignUpPage';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-// import axios from 'axios';
+import { setupServer } from 'msw/node';
+import { rest } from 'msw';
 import 'whatwg-fetch';
 
 describe('Sign Up Page', () => {
@@ -62,7 +63,15 @@ describe('Sign Up Page', () => {
       const button = screen.queryByRole('button', { name: 'Sign Up' });
       expect(button).toBeEnabled();
     });
-    it('sends username, email and password to backend after clicking the button', () => {
+    it('sends username, email and password to backend after clicking the button', async () => {
+      let requestBody;
+      const server = setupServer(
+        rest.post('/users', (req, res, ctx) => {
+          requestBody = req.body;
+          return res(ctx.status(200));
+        })
+      );
+      server.listen();
       render(<SignUpPage />);
       const usernameInput = screen.getByLabelText('Username');
       const emailInput = screen.getByLabelText('E-mail');
@@ -73,21 +82,16 @@ describe('Sign Up Page', () => {
       userEvent.type(passwordInput, 'P4ssword');
       userEvent.type(passwordRepeatInput, 'P4ssword');
       const button = screen.queryByRole('button', { name: 'Sign Up' });
-
-      const mockFn = jest.fn();
-      // axios.post = mockFn;
-      window.fetch = mockFn;
-
       userEvent.click(button);
 
-      const firstCallOfMockFunction = mockFn.mock.calls[0];
-      // const body = firstCallOfMockFunction[1];
-      const body = JSON.parse(firstCallOfMockFunction[1].body);
-      expect(body).toEqual({
-        username: 'user1',
-        email: 'user1@mail.com',
-        password: 'P4ssword'
-      });
+      await waitFor(() => {
+        expect(requestBody).toEqual({
+          username: 'user1',
+          email: 'user1@mail.com',
+          password: 'P4ssword'
+        });
+      })
+
     });
   });
 });
