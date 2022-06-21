@@ -36,6 +36,7 @@ class SignUpPage extends Component {
         this.setState({ errors: error.response.data });
       }
     }
+    this.setState({ apiProgress: false });
   };
 
   render() {
